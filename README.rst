@@ -23,7 +23,7 @@ This collection of scripts for **Travis CI** can be used with the following :cod
       # Add here environement variables to control the Travis CI build
 
     install:
-      - git clone https://github.com/StatisKit/travis-ci.git travis-ci
+      - git clone https://github.com/OpenAlea/travis-ci.git travis-ci
       - cd travis-ci
       - source install.sh
 
