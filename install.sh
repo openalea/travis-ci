@@ -1,4 +1,30 @@
+## Copyright [2017-2018] UMR MISTEA INRA, UMR LEPSE INRA,                ##
+##                       UMR AGAP CIRAD, EPI Virtual Plants Inria        ##
+##                                                                       ##
+## This file is part of the StatisKit project. More information can be   ##
+## found at                                                              ##
+##                                                                       ##
+##     http://autowig.rtfd.io                                            ##
+##                                                                       ##
+## The Apache Software Foundation (ASF) licenses this file to you under  ##
+## the Apache License, Version 2.0 (the "License"); you may not use this ##
+## file except in compliance with the License. You should have received  ##
+## a copy of the Apache License, Version 2.0 along with this file; see   ##
+## the file LICENSE. If not, you may obtain a copy of the License at     ##
+##                                                                       ##
+##     http://www.apache.org/licenses/LICENSE-2.0                        ##
+##                                                                       ##
+## Unless required by applicable law or agreed to in writing, software   ##
+## distributed under the License is distributed on an "AS IS" BASIS,     ##
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or       ##
+## mplied. See the License for the specific language governing           ##
+## permissions and limitations under the License.                        ##
+
 set -ev
+
+if [[ "$ARCH" = "" ]]; then
+  export ARCH=x86_64
+fi
 
 if [[ "$CONDA_VERSION" = "" ]]; then
   export CONDA_VERSION=2
@@ -18,6 +44,10 @@ if [[ "$ANACONDA_DEPLOY" = "" ]]; then
     fi
 fi
 
+if [[ "$ANACONDA_RELEASE" = "" ]]; then
+    export ANACONDA_RELEASE=false
+fi
+
 if [[ "$ANACONDA_LABEL" = "" ]]; then
     export ANACONDA_LABEL=main
 fi
@@ -35,11 +65,15 @@ if [[ "$DOCKER_DEPLOY" = "" ]]; then
         export DOCKER_DEPLOY=false
     fi
 fi
-
-if [[ ! "$DOCKERFILE" = "" ]]; then
-  if [[ "$DOCKER_REPOSITORY" = "" ]]; then
-    export DOCKER_REPOSITORY=`basename $(dirname ..\$DOCKERFILE)`
+  
+if [[ ! "$DOCKER_CONTEXT" = "" ]]; then
+  if [[ "$DOCKER_CONTAINER" = "" ]]; then
+    export DOCKER_CONTAINER=`basename $(dirname ..\$DOCKER_CONTEXT)`
   fi
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  sudo apt-get update
+  sudo apt-get -y install docker-ce 
 fi
 
 if [[ "$TRAVIS_TAG" = "" ]]; then
@@ -50,23 +84,6 @@ if [[ "$TRAVIS_WAIT" = "true" ]]; then
   TRAVIS_WAIT=travis_wait
 elif [[ ! "$TRAVIS_WAIT" = "" ]]; then
   TRAVIS_WAIT="travis_wait $TRAVIS_WAIT"
-fi
-
-if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
-  sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  if [[ "$PLATFORM" = "x86" ]]; then
-    sudo apt-get install ia32-libs
-  fi
-  sudo apt-get update
-  sudo apt-get install -qq gcc-5 g++-5
-  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
-  if [[ ! "$DOCKERFILE" = "" ]]; then
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    sudo apt-get update
-    sudo apt-get -y install docker-ce
-  fi
-  sudo apt-get install gfortran
 fi
 
 if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
@@ -83,10 +100,15 @@ source activate root
 if [[ ! "$ANACONDA_CHANNELS" = "" ]]; then
   conda config --add channels $ANACONDA_CHANNELS
 fi
-source config.sh
+conda config --set always_yes yes
 
 conda update conda
 conda install conda-build anaconda-client
+if [[ "$ANACONDA_LABEL" = "release" ]]; then
+  conda install requests
+  python release.py
+fi
+source config.sh
 
 export PYTHON_VERSION=`python -c "import sys; print(str(sys.version_info.major) + str(sys.version_info.minor))"`
 
