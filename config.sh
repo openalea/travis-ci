@@ -20,27 +20,23 @@
 ## mplied. See the License for the specific language governing           ##
 ## permissions and limitations under the License.                        ##
 
-
-if [[ "$ANACONDA_UPLOAD" = "openalea" && "$ANACONDA_LABEL" = "release" && ! "$TRAVIS_BRANCH" = "master" ]]; then
-  export ANACONDA_LABEL="unstable"
-fi
 if [[ "$ANACONDA_UPLOAD" = "openalea" && ! "$ANACONDA_LABEL" = "release" && ! "$ANACONDA_LABEL" = "unstable" ]]; then
-  echo "Variable ANACONDA_LABEL set to '"$ANACONDA_LABEL"' instead of 'release' or 'unstable'"
-  exit 1
+    echo "Variable ANACONDA_LABEL set to '"$ANACONDA_LABEL"' instead of 'release' or 'unstable'"
+    exit 1
 fi
 
 if [[ ! "$ANACONDA_UPLOAD" = "openalea" ]]; then
-  conda config --add channels openalea
-  conda config --add channels openalea/label/unstable
-  conda config --add channels $ANACONDA_UPLOAD
-  if [[ ! "$ANACONDA_LABEL" = "main" ]]; then
-      conda config --add channels $ANACONDA_UPLOAD/label/$ANACONDA_LABEL
-  fi
-else
-  conda config --add channels openalea
-  if [[ "$ANACONDA_LABEL" = "release" ]]; then
+    conda config --add channels openalea
+    if [[ ! "$ANACONDA_LABEL" = "release" ]]; then
+        conda config --add channels openalea/label/$ANACONDA_LABEL
+    fi
+fi
+
+if [[ "$ANACONDA_LABEL" = "release" ]]; then
     export ANACONDA_LABEL=$TRAVIS_OS_NAME-$ARCH"_release"
-    export ANACONDA_RELEASE=true
-  fi
-  conda config --add channels openalea/label/$ANACONDA_LABEL
+fi
+
+conda config --add channels $ANACONDA_UPLOAD
+if [[ ! "$ANACONDA_LABEL" = "main" ]]; then
+    conda config --add channels $ANACONDA_UPLOAD/label/$ANACONDA_LABEL
 fi
