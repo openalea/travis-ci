@@ -23,13 +23,14 @@
 set -ev
 
 if [[ ! "$CONDA_RECIPE" = "" ]]; then
-  $TRAVIS_WAIT conda build --old-build-string --python=$PYTHON_VERSION ../$CONDA_RECIPE
+  $TRAVIS_WAIT conda build $OLD_BUILD_STRING_ARG --python=$PYTHON_VERSION ../$CONDA_RECIPE
 elif [[ ! "$JUPYTER_NOTEBOOK" = "" ]]; then
-  $TRAVIS_WAIT jupyter nbconvert --ExecutePreprocessor.kernel_name='python'$CONDA_VERSION --ExecutePreprocessor.timeout=0 --to notebook --execute ../$JUPYTER_NOTEBOOK --output ../$JUPYTER_NOTEBOOK
+  $TRAVIS_WAIT jupyter nbconvert --ExecutePreprocessor.kernel_name='python'$CONDA_VERSION --ExecutePreprocessor.timeout=0 --to notebook --execute --inplace ../$JUPYTER_NOTEBOOK
 elif [[ ! "$DOCKER_CONTEXT" = "" ]]; then
-  mv ../$DOCKER_CONTEXT DockerContext
-  eval $TRAVIS_WAIT" docker build --build-arg CONDA_VERSION=$CONDA_VERSION -t $DOCKER_UPLOAD/"$DOCKER_CONTAINER":"$TRAVIS_TAG"-py"$CONDA_VERSION"k DockerContext"
-  mv DockerContext ../$DOCKER_CONTEXT
+  cp -R ../$DOCKER_CONTEXT $DOCKER_CONTAINER
+  cp $HOME/.condarc $DOCKER_CONTAINER/.condarc
+  $TRAVIS_WAIT sudo docker build --build-arg CONDA_VERSION=${CONDA_VERSION} -t ${DOCKER_UPLOAD}/${DOCKER_CONTAINER}:${TRAVIS_TAG}-py${CONDA_VERSION}k ${DOCKER_CONTAINER}
+  rm -rf $DOCKER_CONTAINER
 fi
 
 set +ev

@@ -21,7 +21,12 @@
 ## permissions and limitations under the License.                        ##
 
 set -ev
-
-rm -rf $HOME/miniconda
+ 
+if [[ "$CI" == "false" ]]; then
+    set +v
+    source activate
+    set -v
+    conda env remove -n py${CONDA_VERSION}k
+fi
 
 set +ev

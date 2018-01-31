@@ -14,12 +14,26 @@
 ##                                                                       ##
 ##     http://www.apache.org/licenses/LICENSE-2.0                        ##
 ##                                                                       ##
-## Unless required by applicable law or agreed to in writing, software   ##
+## Unless required by applicable law or agreed to in writing, software   ##`
 ## distributed under the License is distributed on an "AS IS" BASIS,     ##
 ## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or       ##
 ## mplied. See the License for the specific language governing           ##
 ## permissions and limitations under the License.                        ##
 
-set -ev
+anaconda config --set auto_register yes
 
-set +ev
+if [[ "$ANACONDA_LABEL_ARG" = "" ]]; then
+  export ANACONDA_LABEL_ARG=$ANACONDA_LABEL
+fi
+
+if [[ "$OLD_BUILD_STRING" = "true" ]]; then
+    export OLD_BUILD_STRING_ARG="--old-build-string"
+else
+    export OLD_BUILD_STRING_ARG=
+fi
+
+if [[ "$ANACONDA_FORCE" = "true" ]]; then
+    export ANACONDA_FORCE_ARG="--force"
+else
+    export ANACONDA_FORCE_ARG=
+fi

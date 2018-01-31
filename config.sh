@@ -20,6 +20,20 @@
 ## mplied. See the License for the specific language governing           ##
 ## permissions and limitations under the License.                        ##
 
+if [[ "$TRAVIS_EVENT_TYPE" = "api" ]]; then
+    export ANACONDA_FORCE="true"
+else
+    export ANACONDA_FORCE="true"
+fi
+
+if [[ "$ANACONDA_LABEL" = "release" ]]; then
+    export OLD_BUILD_STRING="false"
+    export ANACONDA_LABEL_ARG=$TRAVIS_OS_NAME-$ARCH"_release"
+else
+    export OLD_BUILD_STRING="true"
+    export ANACONDA_LABEL_ARG=$ANACONDA_LABEL
+fi
+
 if [[ "$ANACONDA_UPLOAD" = "openalea" && ! "$ANACONDA_LABEL" = "release" && ! "$ANACONDA_LABEL" = "unstable" ]]; then
     echo "Variable ANACONDA_LABEL set to '"$ANACONDA_LABEL"' instead of 'release' or 'unstable'"
     exit 1
@@ -32,11 +46,9 @@ if [[ ! "$ANACONDA_UPLOAD" = "openalea" ]]; then
     fi
 fi
 
-if [[ "$ANACONDA_LABEL" = "release" ]]; then
-    export ANACONDA_LABEL=$TRAVIS_OS_NAME-$ARCH"_release"
-fi
-
-conda config --add channels $ANACONDA_UPLOAD
-if [[ ! "$ANACONDA_LABEL" = "main" ]]; then
-    conda config --add channels $ANACONDA_UPLOAD/label/$ANACONDA_LABEL
+if [[ ! "$ANACONDA_UPLOAD" = "" ]]; then
+    conda config --add channels $ANACONDA_UPLOAD
+    if [[ ! "$ANACONDA_LABEL" = "main" ]]; then
+        conda config --add channels $ANACONDA_UPLOAD/label/$ANACONDA_LABEL_ARG
+    fi
 fi

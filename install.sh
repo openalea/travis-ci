@@ -22,6 +22,10 @@
 
 set -ev
 
+if [[ "$CI" = "false" ]]; then
+  git submodule update --init
+fi
+
 if [[ "$ARCH" = "" ]]; then
   export ARCH=x86_64
 fi
@@ -65,53 +69,101 @@ if [[ "$DOCKER_DEPLOY" = "" ]]; then
         export DOCKER_DEPLOY=false
     fi
 fi
-  
+
 if [[ ! "$DOCKER_CONTEXT" = "" ]]; then
   if [[ "$DOCKER_CONTAINER" = "" ]]; then
-    export DOCKER_CONTAINER=`basename $(dirname ..\$DOCKER_CONTEXT)`
+    export DOCKER_CONTAINER=`basename $DOCKER_CONTEXT`
   fi
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  sudo apt-get update
-  sudo apt-get -y install docker-ce 
+  if [[ "$CI" = "true" ]]; then
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    sudo apt-get update
+    sudo apt-get -y install docker-ce 
+  fi
 fi
 
 if [[ "$TRAVIS_TAG" = "" ]]; then
   export TRAVIS_TAG="latest"
 fi
 
-if [[ "$TRAVIS_WAIT" = "true" ]]; then
-  TRAVIS_WAIT=travis_wait
-elif [[ ! "$TRAVIS_WAIT" = "" ]]; then
-  TRAVIS_WAIT="travis_wait $TRAVIS_WAIT"
-fi
 
-if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
-  curl "https://repo.continuum.io/miniconda/Miniconda"$CONDA_VERSION"-latest-Linux-x86_64.sh" -o miniconda.sh
+if [[ "$CI" = "true" ]]; then
+  if [[ "$TRAVIS_WAIT" = "true" ]]; then
+    export TRAVIS_WAIT=travis_wait
+  elif [[ ! "$TRAVIS_WAIT" = "" ]]; then
+    export TRAVIS_WAIT="travis_wait $TRAVIS_WAIT"
+  fi
 else
-  curl "https://repo.continuum.io/miniconda/Miniconda"$CONDA_VERSION"-latest-MacOSX-x86_64.sh" -o miniconda.sh
+  export TRAVIS_WAIT=
 fi
 
-chmod a+rwx miniconda.sh
-./miniconda.sh -b -p $HOME/miniconda
-rm miniconda.sh
-export PATH=$HOME/miniconda/bin:$PATH
-source activate root
+if [[ "$CONDA_PREFIX" = "" || ! -d "$CONDA_PREFIX" ]]; then
+  if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
+    curl https://repo.continuum.io/miniconda/Miniconda${CONDA_VERSION}-latest-Linux-${ARCH}.sh -o miniconda.sh
+  else
+    curl https://repo.continuum.io/miniconda/Miniconda${CONDA_VERSION}-latest-MacOSX-x86_64.sh -o miniconda.sh
+  fi
+
+  chmod a+rwx miniconda.sh
+  set +v
+  if [[ "$CONDA_PREFIX" = "" ]]; then
+    ./miniconda.sh -b -p $HOME/miniconda
+  else
+    ./miniconda.sh -b -p $CONDA_PREFIX
+  fi
+  set -v
+  rm miniconda.sh
+fi
+if [[ "$CONDA_PREFIX" = "" ]]; then
+  export PATH=$HOME/miniconda/bin:$PATH
+else
+  export PATH=$CONDA_PREFIX/bin:$PATH
+fi
+
+set +v
+source activate
+set -v
 if [[ ! "$ANACONDA_CHANNELS" = "" ]]; then
   conda config --add channels $ANACONDA_CHANNELS
 fi
 conda config --set always_yes yes
+conda config --set remote_read_timeout_secs 600
+conda config --set auto_update_conda False
 
-conda install conda=4.3.30
-
-conda install requests
-python release.py
-
+conda install conda=4.3.30 conda-build=3.0.30 anaconda-client=1.6.5
+set +v
+source activate
+set -v
 source config.sh
 
+if [[ "$CI" = "true" ]]; then
+  conda install requests
+  python release.py
+fi
+
+if [[ "$CI" = "false" ]]; then
+    conda create -n py${CONDA_VERSION}k python=$CONDA_VERSION
+    set +v
+    source activate py${CONDA_VERSION}k
+    set -v
+fi
+conda install anaconda-client=1.6.5
 export PYTHON_VERSION=`python -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"`
 
-conda install conda=4.3.30 conda-build=3.0.30 anaconda-client
-source activate root
+if [[ ! "$CONDA_PACKAGES" = "" ]]; then
+    if [[ "$CI" = "true" ]]; then
+        conda install $CONDA_PACKAGES --use-local
+        set +v
+        source activate
+        set -v
+    else
+        conda install -n py${CONDA_VERSION}k $CONDA_PACKAGES --use-local
+        set +v
+        source activate py${CONDA_VERSION}k
+        set -v
+    fi
+fi
+
+source post_config.sh
 
 set +ev
