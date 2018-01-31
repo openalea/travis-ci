@@ -121,7 +121,12 @@ else
 fi
 
 set +v
-source $CONDA_PREFIX/bin/activate
+if [[ "$CONDA_PREFIX" = "" ]]; then
+  source activate
+else
+  source $CONDA_PREFIX/bin/activate
+fi
+
 set -v
 if [[ ! "$ANACONDA_CHANNELS" = "" ]]; then
   conda config --add channels $ANACONDA_CHANNELS
