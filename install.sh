@@ -78,7 +78,7 @@ if [[ ! "$DOCKER_CONTEXT" = "" ]]; then
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     sudo apt-get update
-    sudo apt-get -y install docker-ce 
+    sudo apt-get -y install docker-ce
   fi
 fi
 
@@ -121,7 +121,7 @@ else
 fi
 
 set +v
-source activate
+source $CONDA_PREFIX/bin/activate
 set -v
 if [[ ! "$ANACONDA_CHANNELS" = "" ]]; then
   conda config --add channels $ANACONDA_CHANNELS
