@@ -42,7 +42,7 @@ fi
 if [[ ! "$ANACONDA_UPLOAD" = "openalea" ]]; then
     conda config --add channels openalea
     if [[ ! "$ANACONDA_LABEL" = "release" ]]; then
-        conda config --add channels openalea/label/$ANACONDA_LABEL
+        conda config --add channels openalea/label/unstable
     fi
 fi
 
