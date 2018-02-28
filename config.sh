@@ -36,12 +36,12 @@ else
     export ANACONDA_LABEL_ARG=$ANACONDA_LABEL
 fi
 
-if [[ "$ANACONDA_UPLOAD" = "openalea" && ! "$ANACONDA_LABEL" = "release" && ! "$ANACONDA_LABEL" = "unstable" ]]; then
+if [[ "$ANACONDA_OWNER" = "openalea" && ! "$ANACONDA_LABEL" = "release" && ! "$ANACONDA_LABEL" = "unstable" ]]; then
     echo "Variable ANACONDA_LABEL set to '"$ANACONDA_LABEL"' instead of 'release' or 'unstable'"
     exit 1
 fi
 
-if [[ ! "$ANACONDA_UPLOAD" = "openalea" ]]; then
+if [[ ! "$ANACONDA_OWNER" = "openalea" ]]; then
     conda config --add channels openalea
     if [[ ! "$ANACONDA_LABEL" = "release" ]]; then
         conda config --add channels openalea/label/unstable
