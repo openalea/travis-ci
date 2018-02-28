@@ -20,15 +20,17 @@
 ## mplied. See the License for the specific language governing           ##
 ## permissions and limitations under the License.                        ##
 
-if [[ "$TRAVIS_EVENT_TYPE" = "api" ]]; then
-    export ANACONDA_FORCE="true"
-else
-    export ANACONDA_FORCE="true"
-fi
+
+export ANACONDA_FORCE="true"
 
 if [[ "$ANACONDA_LABEL" = "release" ]]; then
-    export OLD_BUILD_STRING="false"
-    export ANACONDA_LABEL_ARG=$TRAVIS_OS_NAME-$ARCH"_release"
+    if [[ "$TRAVIS_BRANCH" = "master" || ! "$TRAVIS_TAG" = "latest" ]]; then
+        export OLD_BUILD_STRING="false"
+        export ANACONDA_LABEL_ARG=$TRAVIS_OS_NAME-$ARCH"_release"
+    else
+        export OLD_BUILD_STRING="true"
+        export ANACONDA_LABEL_ARG="unstable"
+    fi
 else
     export OLD_BUILD_STRING="true"
     export ANACONDA_LABEL_ARG=$ANACONDA_LABEL
@@ -46,9 +48,9 @@ if [[ ! "$ANACONDA_UPLOAD" = "openalea" ]]; then
     fi
 fi
 
-if [[ ! "$ANACONDA_UPLOAD" = "" ]]; then
-    conda config --add channels $ANACONDA_UPLOAD
-    if [[ ! "$ANACONDA_LABEL" = "main" ]]; then
-        conda config --add channels $ANACONDA_UPLOAD/label/$ANACONDA_LABEL_ARG
+if [[ ! "$ANACONDA_OWNER" = "" ]]; then
+    conda config --add channels $ANACONDA_OWNER
+    if [[ ! "$ANACONDA_LABEL_ARG" = "main" ]]; then
+        conda config --add channels $ANACONDA_OWNER/label/$ANACONDA_LABEL_ARG
     fi
 fi
