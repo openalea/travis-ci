@@ -173,7 +173,7 @@ else
     conda install anaconda-client
 fi
 export PYTHON_VERSION=`python -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"`
-
+echo $PYTHON_VERSION
 if [[ ! "$CONDA_PACKAGES" = "" ]]; then
     if [[ "$CI" = "true" ]]; then
         conda install $CONDA_PACKAGES --use-local
