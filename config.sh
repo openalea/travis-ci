@@ -25,14 +25,20 @@ export ANACONDA_FORCE="true"
 
 if [[ "$ANACONDA_LABEL" = "release" ]]; then
     if [[ "$TRAVIS_BRANCH" = "master" || ! "$TRAVIS_TAG" = "latest" ]]; then
-        export OLD_BUILD_STRING="false"
+        if [[ "$OLD_BUILD_STRING" = "" ]]; then
+            export OLD_BUILD_STRING="false"
+        fi
         export ANACONDA_LABEL_ARG=$TRAVIS_OS_NAME-$ARCH"_release"
     else
-        export OLD_BUILD_STRING="true"
+        if [[ "$OLD_BUILD_STRING" = "" ]]; then
+            export OLD_BUILD_STRING="true"
+        fi
         export ANACONDA_LABEL_ARG="unstable"
     fi
 else
-    export OLD_BUILD_STRING="true"
+    if [[ "$OLD_BUILD_STRING" = "" ]]; then
+        export OLD_BUILD_STRING="false"
+    fi
     export ANACONDA_LABEL_ARG=$ANACONDA_LABEL
 fi
 
