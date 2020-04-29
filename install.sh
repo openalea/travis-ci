@@ -176,7 +176,7 @@ fi
 
 if [[ "$CONDA_PY" = "" ]]; then
     export CONDA_PY=`python -c "import sys; print(str(sys.version_info.major) + str(sys.version_info.minor))"`
-else
+fi
 
 if [[ "$PYTHON_VERSION" = "" ]]; then
     export PYTHON_VERSION=${CONDA_PY:0:1}.${CONDA_PY:1:1}
