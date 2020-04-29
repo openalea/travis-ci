@@ -156,9 +156,6 @@ source activate
 set -v
 source config.sh
 
-if [[ "$CONDA_PY" = "" ]]; then
-    export CONDA_PY=$CONDA_VERSION
-fi
 
 if [[ "$CI" = "true" ]]; then
   conda install requests
@@ -166,7 +163,7 @@ if [[ "$CI" = "true" ]]; then
 fi
 
 if [[ "$CI" = "false" ]]; then
-    conda create -n py${CONDA_VERSION}k python=$CONDA_PY
+    conda create -n py${CONDA_VERSION}k python=$CONDA_VERSION
     set +v
     source activate py${CONDA_VERSION}k
     set -v
@@ -177,8 +174,13 @@ else
     conda install anaconda-client
 fi
 
-export PYTHON_VERSION=`python -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"`
-export CONDA_PY=`python -c "import sys; print(str(sys.version_info.major) + str(sys.version_info.minor))"`
+if [[ "$CONDA_PY" = "" ]]; then
+    export CONDA_PY=`python -c "import sys; print(str(sys.version_info.major) + str(sys.version_info.minor))"`
+else
+
+if [[ "$PYTHON_VERSION" = "" ]]; then
+    export PYTHON_VERSION=${CONDA_PY:0:1}.${CONDA_PY:1:1}
+fi
 
 if [[ ! "$CONDA_PACKAGES" = "" ]]; then
     if [[ "$CI" = "true" ]]; then
