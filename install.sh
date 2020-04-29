@@ -107,9 +107,9 @@ fi
 
 if [[ "$CONDA_PREFIX" = "" || ! -d "$CONDA_PREFIX" ]]; then
   if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
-    curl https://repo.anaconda.com/miniconda/Miniconda${CONDA_VERSION}-latest-Linux-${ARCH}.sh -o miniconda.sh
+    curl https://repo.continuum.io/miniconda/Miniconda${CONDA_VERSION}-latest-Linux-${ARCH}.sh -o miniconda.sh
   else
-    curl https://repo.anaconda.com/miniconda/Miniconda${CONDA_VERSION}-latest-MacOSX-x86_64.sh -o miniconda.sh
+    curl https://repo.continuum.io/miniconda/Miniconda${CONDA_VERSION}-latest-MacOSX-x86_64.sh -o miniconda.sh
   fi
 
   chmod a+rwx miniconda.sh
@@ -156,9 +156,7 @@ source activate
 set -v
 source config.sh
 
-if [[ ! "$PYTHON_VERSION" = "" ]]; then
-    export CONDA_PY=$PYTHON_VERSION
-else
+if [[ "$CONDA_PY" = "" ]]; then
     export CONDA_PY=$CONDA_VERSION
 fi
 
@@ -179,16 +177,8 @@ else
     conda install anaconda-client
 fi
 
+export PYTHON_VERSION=`python -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"`
 export CONDA_PY=`python -c "import sys; print(str(sys.version_info.major) + str(sys.version_info.minor))"`
-
-if [[ "$PYTHON_VERSION" = "" ]]; then
-    export PYTHON_VERSION=$CONDA_PY
-else
-    if [[ ! "$PYTHON_VERSION" = "$CONDA_PY" ]]; then
-        printf '%s %s vs %s\n' "PYTHON_VERSION and conda python version do not match :" "$PYTHON_VERSION" "$CONDA_PY" >&2
-        exit -1
-    fi
-fi
 
 if [[ ! "$CONDA_PACKAGES" = "" ]]; then
     if [[ "$CI" = "true" ]]; then
