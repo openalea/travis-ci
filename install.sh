@@ -107,9 +107,9 @@ fi
 
 if [[ "$CONDA_PREFIX" = "" || ! -d "$CONDA_PREFIX" ]]; then
   if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
-    curl https://repo.continuum.io/miniconda/Miniconda${CONDA_VERSION}-latest-Linux-${ARCH}.sh -o miniconda.sh
+    curl https://repo.anaconda.com/miniconda/Miniconda${CONDA_VERSION}-latest-Linux-${ARCH}.sh -o miniconda.sh
   else
-    curl https://repo.continuum.io/miniconda/Miniconda${CONDA_VERSION}-latest-MacOSX-x86_64.sh -o miniconda.sh
+    curl https://repo.anaconda.com/miniconda/Miniconda${CONDA_VERSION}-latest-MacOSX-x86_64.sh -o miniconda.sh
   fi
 
   chmod a+rwx miniconda.sh
