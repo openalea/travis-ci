@@ -35,7 +35,7 @@ if [[ "$ARCH" = "" ]]; then
 fi
 
 if [[ "$CONDA_VERSION" = "" ]]; then
-  export CONDA_VERSION=2
+  export CONDA_VERSION=3
 fi
 
 if [[ ! "$ANACONDA_LOGIN" = "" ]]; then
@@ -156,13 +156,19 @@ source activate
 set -v
 source config.sh
 
+if [[ ! "$PYTHON_VERSION" = "" ]]; then
+    export CONDA_PY=$PYTHON_VERSION
+else
+    export CONDA_PY=$CONDA_VERSION
+fi
+
 if [[ "$CI" = "true" ]]; then
   conda install requests
   python release.py
 fi
 
 if [[ "$CI" = "false" ]]; then
-    conda create -n py${CONDA_VERSION}k python=$CONDA_VERSION
+    conda create -n py${CONDA_VERSION}k python=$CONDA_PY
     set +v
     source activate py${CONDA_VERSION}k
     set -v
@@ -173,8 +179,16 @@ else
     conda install anaconda-client
 fi
 
-export PYTHON_VERSION=`python -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"`
 export CONDA_PY=`python -c "import sys; print(str(sys.version_info.major) + str(sys.version_info.minor))"`
+
+if [[ "$PYTHON_VERSION" = "" ]]; then
+    export PYTHON_VERSION=$CONDA_PY
+else
+    if [[ ! "$PYTHON_VERSION" = "$CONDA_PY" ]]; then
+        printf '%s %s vs %s\n' "PYTHON_VERSION and conda python version do not match :" "$PYTHON_VERSION" "$CONDA_PY" >&2
+        exit -1
+    fi
+fi
 
 if [[ ! "$CONDA_PACKAGES" = "" ]]; then
     if [[ "$CI" = "true" ]]; then
