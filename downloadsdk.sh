@@ -4,7 +4,7 @@ if [ `uname` = "Darwin" ];  then
     if [[ ! -d MacOSX10.9.sdk ]]; then
         echo "Problem with download of the SDK"
     fi
-    ls MacOSX10.9.sdk
+    #ls MacOSX10.9.sdk
     echo "CONDA_BUILD_SYSROOT:
  - `pwd`/MacOSX10.9.sdk
  " > ../conda/conda_build_config.yaml
