@@ -7,6 +7,6 @@ if [ `uname` = "Darwin" ];  then
     ls MacOSX10.9.sdk
     echo "CONDA_BUILD_SYSROOT:
  - `pwd`/MacOSX10.9.sdk
- " > conda/conda_build_config.yaml
-    more conda/conda_build_config.yaml
+ " > ../conda/conda_build_config.yaml
+    more ../conda/conda_build_config.yaml
 fi
