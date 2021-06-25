@@ -3,7 +3,7 @@ import json
 import os
 
 headers = {"Accept": "application/vnd.travis-ci.2+json"}
-url = "https://api.travis-ci.org/repos/" + os.environ["TRAVIS_REPO_SLUG"] + "/builds/" + os.environ["TRAVIS_BUILD_ID"]
+url = "https://api.travis-ci.com/repos/" + os.environ["TRAVIS_REPO_SLUG"] + "/builds/" + os.environ["TRAVIS_BUILD_ID"]
 
 TRAVIS_JOB_NUMBER = int(os.environ["TRAVIS_JOB_NUMBER"][len(os.environ["TRAVIS_BUILD_NUMBER"]) + 1:])
 try:
